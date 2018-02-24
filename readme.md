@@ -1,6 +1,5 @@
 # My personal workflow
 It's files that I use when I code for frontend, using Webpack with SASS and Babel for ES6.
-I also use a reset CSS, a normalize style and somes personal JS functions. Each one are already imported in the app.css and app.js sources files.
 
 ## Download and intallation
 Open a terminal in your dev folder and run the command :
