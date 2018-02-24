@@ -28,6 +28,16 @@ function trailingSlashes(string) {
     return string.trim().replace(/^\/|\/$/g, '');
 }
 
+function isExternalModule(module) {
+    var context = module.context
+
+    if (typeof context !== 'string') {
+        return false
+    }
+
+    return context.indexOf('node_modules') !== -1
+}
+
 if (isProd || isStaging) {
     cssLoaders.push( {
             loader: 'postcss-loader',
@@ -154,26 +164,20 @@ let config = {
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendors',
             minChunks: Infinity
-            // minChunks: function(module) {
-            //     var context = module.context
-            //
-            //     if (typeof context !== 'string') {
-            //       return false
-            //     }
-            //
-            //     return context.indexOf('node_modules') !== -1
-            // }
         })
     ]
 }
 
 if (isProd) {
+    /* CleanWebpackPlugin dont working on my Windows Environnement and still dont know why ... */
+
     // config.plugins.push(new CleanWebpackPlugin([trailingSlashes(public_dir)], {
     //     root: path.resolve('./'),
     //     verbose: false,
     //     dry: false,
     //     beforeEmit: true
     // }))
+    
     config.plugins.push(new UglifyJSPlugin)
     config.devtool = false
 }
