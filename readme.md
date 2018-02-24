@@ -7,13 +7,18 @@ Open a terminal in your dev folder and run the command :
 ```sh
 $ git clone https://github.com/ahy14/workflow && npm run hello
 ```
-The first will download from repository and the second will run a personal command that install the dependencies and make useful folders.
+The first will download from repository and the second will run a personal command that install the dependencies.
 Don't forget to make yourself a index.html or index.php on root folder.
 
 ## Run the workflow for developpement
 When you are in developpement, you can run the workflow with this command :
 ```sh
 $ npm run dev
+```
+
+For watching the files during developpement, use instead this :
+```sh
+$ npm run watch
 ```
 
 ## Compile the sources for production
