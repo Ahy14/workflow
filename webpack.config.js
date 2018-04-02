@@ -1,12 +1,12 @@
 const path = require('path')
-const chalk = require('chalk');
+const chalk = require('chalk')
 const webpack = require('webpack')
 const ManifestPlugin = require('webpack-manifest-plugin')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const ProgressBarPlugin = require('progress-bar-webpack-plugin')
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 
 const isDev = process.env.NODE_ENV === 'development'
 const isStaging = process.env.NODE_ENV === 'staging'
@@ -25,7 +25,7 @@ let cssLoaders = [
 ]
 
 function trailingSlashes(string) {
-    return string.trim().replace(/^\/|\/$/g, '');
+    return string.trim().replace(/^\/|\/$/g, '')
 }
 
 function isExternalModule(module) {
@@ -148,8 +148,8 @@ let config = {
                     ],
                     fn: function(event, file) {
                         if (event === "change") {
-                            const bs = require('browser-sync').get('bs-webpack-plugin');
-                            bs.reload();
+                            const bs = require('browser-sync').get('bs-webpack-plugin')
+                            bs.reload()
                         }
                     }
                 }
@@ -177,7 +177,7 @@ if (isProd) {
     //     dry: false,
     //     beforeEmit: true
     // }))
-    
+
     config.plugins.push(new UglifyJSPlugin)
     config.devtool = false
 }
