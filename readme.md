@@ -4,7 +4,7 @@ It's files that I use when I code for frontend, using Webpack with SASS and Babe
 ## Download and intallation
 Open a terminal in your dev folder and run the command :
 ```sh
-$ git clone https://github.com/ahy14/workflow && npm run hello
+$ git clone https://github.com/anthonypauwels/workflow && npm run hello
 ```
 The first will download from repository and the second will run a personal command that install the dependencies.
 Don't forget to make yourself a index.html or index.php on root folder.
