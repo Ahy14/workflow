@@ -102,11 +102,11 @@ module.exports = {
         new CopyWebpackPlugin([
             {
                 from: './assets/images/',
-                to: 'images/',
+                to: 'images/'
             },
             {
                 from: './assets/fonts/',
-                to: 'fonts/',
+                to: 'fonts/'
             }]),
         new ImageminPlugin({
             disable: !is_prod, // Disable during development
@@ -134,4 +134,4 @@ module.exports = {
             }
         }
     }
-}
+};
