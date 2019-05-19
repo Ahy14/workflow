@@ -1,5 +1,5 @@
 # My personal workflow
-It's files that I use when I code for frontend, using Webpack with SASS and Babel for ES6.
+It's files that I use when I code for frontend, using Webpack with SASS, Babel (ES6), ESLint and BrowerSync
 
 ## Download and intallation
 Open a terminal in your dev folder and run the command :

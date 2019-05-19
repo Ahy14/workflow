@@ -1,192 +1,137 @@
-const path = require('path')
-const chalk = require('chalk')
-const webpack = require('webpack')
-const ManifestPlugin = require('webpack-manifest-plugin')
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const ProgressBarPlugin = require('progress-bar-webpack-plugin')
-const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const path = require('path');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const WebpackNotifierPlugin = require('webpack-notifier');
+const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+const BrowserSync = require('browser-sync');
+const ImageminPlugin = require('imagemin-webpack-plugin').default;
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
-const isDev = process.env.NODE_ENV === 'development'
-const isStaging = process.env.NODE_ENV === 'staging'
-const isProd = process.env.NODE_ENV === 'production'
+const modulesList = ['/node_modules/', '/bower_components/'];
 
-const supportedBrowsers = ["last 2 versions"]
+const is_prod = process.env.NODE_ENV === 'production';
 
-const public_dir = 'public'
-const assets_dir = public_dir + '/assets'
+const optimizers = [];
 
-const scripts = 'sources/scripts'
-const styles = 'sources/styles'
-
-let cssLoaders = [
-    { loader: 'css-loader', options: { importLoaders: 1, minimize: (isProd || isStaging) } }
-]
-
-function trailingSlashes(string) {
-    return string.trim().replace(/^\/|\/$/g, '')
+if (is_prod) {
+    optimizers.push(new UglifyJsPlugin());
+    optimizers.push(new OptimizeCSSAssetsPlugin());
 }
 
-function isExternalModule(module) {
-    var context = module.context
-
-    if (typeof context !== 'string') {
-        return false
-    }
-
-    return context.indexOf('node_modules') !== -1
-}
-
-if (isProd || isStaging) {
-    cssLoaders.push( {
-            loader: 'postcss-loader',
-            options: {
-                plugins: (loader) => [
-                    require('autoprefixer')({
-                        browsers: supportedBrowsers
-                    })
-                ]
-            }
-        } )
-}
-
-let config = {
+module.exports = {
     entry: {
-        app: ['./' + styles + '/app.scss', './' + scripts + '/app.js']
+        vendor: ['./assets/styles/main.scss'],
+        app: './assets/scripts/main.js'
     },
     output: {
-        path: path.resolve('./' + assets_dir + '/'),
+        path: path.resolve(__dirname, 'public/dist'),
         filename: '[name].js',
-        publicPath: '/' + assets_dir + '/'
+        publicPath: '/'
     },
-    devtool: 'cheap-module-eval-source-map',
+    stats: {
+        warnings: false
+    },
+    devtool: !is_prod ? 'cheap-module-eval-source-map' : 'nosources-source-map',
     resolve: {
         alias: {
-            '@css': path.resolve('./' + styles + '/'),
-            '@': path.resolve('./' + scripts + '/')
+            '@css': path.resolve('./assets/styles/'),
+            '@images': path.resolve('./assets/images/'),
+            '@': path.resolve('./assets/scripts/')
         }
     },
     module: {
         rules: [
             {
-                enforce: 'pre',
                 test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
-                loader: 'eslint-loader',
-                options: {
-                    failOnWarning: false,
-                    failOnError: false,
-                    fix: false,
-                    quiet: false,
-                }
-            }, {
-                test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
+                exclude: /node_modules/,
                 use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets:{
-                            'env': {
-                                plugins: [ 'syntax-dynamic-import' ],
-                                modules: false,
-                                targets: {
-                                    browsers: supportedBrowsers
-                                }
-                            }
-                        }
-                    }
+                    loader: "babel-loader"
                 }
-            }, {
-                test: /\.css$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: cssLoaders
-                })
-            }, {
+            },
+            {
                 test: /\.scss$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: [ ...cssLoaders, 'sass-loader' ]
-                })
-            }, {
-                test:/\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-                use: [ 'file-loader' ]
-            }, {
-                test:/\.(png|jpe?g|gif|svg)$/,
                 use: [
                     {
-                        loader: 'url-loader',
+                        loader: 'file-loader',
                         options: {
-                            limit: 8192,
-                            name: '[name].[ext]'
+                            name: '[name].css'
                         }
-                    }, {
-                        loader: 'img-loader',
-                        options: {
-                            enabled: (isProd || isStaging)
-                        }
+                    },
+                    {
+                        loader: 'extract-loader'
+                    },
+                    {
+                        loader: 'css-loader',
+                        options: { url: false }
+                    },
+                    {
+                        loader: 'sass-loader'
                     }
                 ]
             }
         ]
     },
     plugins: [
-        new ProgressBarPlugin({
-            format: '  build [:bar] ' + chalk.green.bold(':percent') + ' (:elapsed seconds)',
-            clear: true
-        }),
         new BrowserSyncPlugin({
-            notify: false,
-            host: 'localhost',
+            host: 'localhost', // browse to http://localhost:3000/ during development,
             port: 3000,
-            server: { baseDir: [ './' + public_dir + '/' ] },
+            notify: false,
+            server: { baseDir: ['public'] }, // ./public directory is being served
+            // proxy: {
+            //     target: "http://127.0.0.1:8080/your/proxied/website/",
+            // },
             files: [
                 {
                     match: [
                         '**/*.html'
                     ],
-                    fn: function(event, file) {
+                    fn: function (event, file) {
                         if (event === "change") {
-                            const bs = require('browser-sync').get('bs-webpack-plugin')
-                            bs.reload()
+                            const bs = BrowserSync.get('bs-webpack-plugin');
+                            bs.reload();
                         }
                     }
                 }
             ]
         }),
+        new ProgressBarPlugin(),
+        new CleanWebpackPlugin({dry: !is_prod}),
+        new CopyWebpackPlugin([
+            {
+                from: './assets/images/',
+                to: 'images/',
+            },
+            {
+                from: './assets/fonts/',
+                to: 'fonts/',
+            }]),
+        new ImageminPlugin({
+            disable: !is_prod, // Disable during development
+            pngquant: {
+                quality: '95-100'
+            }
+        }),
         new ManifestPlugin({
-            publicPath: '/' + assets_dir + '/'
+            publicPath: 'dist/'
         }),
-        new ExtractTextPlugin({
-            filename: '[name].css'
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendors',
-            minChunks: Infinity
-        })
-    ]
+        new WebpackNotifierPlugin({excludeWarnings: true})
+    ],
+    optimization: {
+        minimizer: optimizers,
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: new RegExp(
+                        `(${modulesList.join("|")})`
+                    ),
+                    chunks: 'initial',
+                    name: 'vendor',
+                    enforce: true
+                }
+            }
+        }
+    }
 }
-
-if (isProd) {
-    /* CleanWebpackPlugin dont working on my Windows Environnement and still dont know why ... */
-
-    // config.plugins.push(new CleanWebpackPlugin([trailingSlashes(public_dir)], {
-    //     root: path.resolve('./'),
-    //     verbose: false,
-    //     dry: false,
-    //     beforeEmit: true
-    // }))
-
-    config.plugins.push(new UglifyJSPlugin)
-    config.devtool = false
-}
-
-if (isStaging) {
-    config.plugins.push(new UglifyJSPlugin({
-        sourceMap: true
-    }))
-    config.devtool = "source-map"
-}
-
-module.exports = config
