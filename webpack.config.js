@@ -10,9 +10,23 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
-const modulesList = ['/node_modules/', '/bower_components/'];
-
 const is_prod = process.env.NODE_ENV === 'production';
+
+const scripts_directory = './assets/scripts/';
+const styles_directory = './assets/styles/';
+const images_directory = './assets/images/';
+const fonts_directory = './assets/fonts/';
+
+const public_directory = './public/';
+const dist_directory = 'dist';
+
+const alias = {
+    '@css': path.resolve(styles_directory),
+    '@images': path.resolve(images_directory),
+    '@': path.resolve(scripts_directory)
+};
+
+const modulesList = ['/node_modules/', '/bower_components/'];
 
 const optimizers = [];
 
@@ -23,11 +37,11 @@ if (is_prod) {
 
 module.exports = {
     entry: {
-        vendor: ['./assets/styles/main.scss'],
-        app: './assets/scripts/main.js'
+        vendor: [styles_directory + 'main.scss'],
+        app: scripts_directory + 'main.js'
     },
     output: {
-        path: path.resolve(__dirname, 'public/dist'),
+        path: path.resolve(__dirname, public_directory + dist_directory),
         filename: '[name].js',
         publicPath: '/'
     },
@@ -36,11 +50,7 @@ module.exports = {
     },
     devtool: !is_prod ? 'cheap-module-eval-source-map' : 'nosources-source-map',
     resolve: {
-        alias: {
-            '@css': path.resolve('./assets/styles/'),
-            '@images': path.resolve('./assets/images/'),
-            '@': path.resolve('./assets/scripts/')
-        }
+        alias: alias
     },
     module: {
         rules: [
@@ -79,7 +89,7 @@ module.exports = {
             host: 'localhost', // browse to http://localhost:3000/ during development,
             port: 3000,
             notify: false,
-            server: { baseDir: ['public'] }, // ./public directory is being served
+            server: { baseDir: [public_directory] }, // ./public directory is being served
             // proxy: {
             //     target: "http://127.0.0.1:8080/your/proxied/website/",
             // },
@@ -101,11 +111,11 @@ module.exports = {
         new CleanWebpackPlugin({dry: !is_prod}),
         new CopyWebpackPlugin([
             {
-                from: './assets/images/',
+                from: images_directory,
                 to: 'images/'
             },
             {
-                from: './assets/fonts/',
+                from: fonts_directory,
                 to: 'fonts/'
             }]),
         new ImageminPlugin({
@@ -115,7 +125,7 @@ module.exports = {
             }
         }),
         new ManifestPlugin({
-            publicPath: 'dist/'
+            publicPath: dist_directory + '/'
         }),
         new WebpackNotifierPlugin({excludeWarnings: true})
     ],
