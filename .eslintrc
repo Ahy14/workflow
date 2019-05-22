@@ -1,6 +1,9 @@
 {
     "extends": "standard",
     "rules": {
-        "indent": ["off", 4]
+        "indent": ["off", 4],
+        "semi": "off",
+        "quotes": 0,
+        "camelcase": "off"
     }
 }
