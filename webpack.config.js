@@ -1,5 +1,5 @@
 const path = require('path');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const WebpackNotifierPlugin = require('webpack-notifier');
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
@@ -17,7 +17,7 @@ const is_prod = process.env.NODE_ENV === 'production';
 const optimizers = [];
 
 if (is_prod) {
-    optimizers.push(new UglifyJsPlugin());
+    optimizers.push(new TerserPlugin());
     optimizers.push(new OptimizeCSSAssetsPlugin());
 }
 
